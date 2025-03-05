@@ -211,6 +211,7 @@ void NewGameInitData(void)
     SetCurrentDifficultyLevel(DIFFICULTY_NORMAL);
     ResetItemFlags();
     ResetDexNav();
+    FlagSet(FLAG_SYS_B_DASH);
 }
 
 static void ResetMiniGamesRecords(void)
