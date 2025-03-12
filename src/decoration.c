@@ -2131,7 +2131,7 @@ static u8 AddDecorationIconObjectFromObjectEvent(u16 tilesTag, u16 paletteTag, u
     }
     else
     {
-        spriteId = CreateObjectGraphicsSpriteWithTag(sPlaceDecorationGraphicsDataBuffer.decoration->tiles[0], SpriteCallbackDummy, 0, 0, 1, paletteTag);
+        spriteId = CreateObjectGraphicsSprite(sPlaceDecorationGraphicsDataBuffer.decoration->tiles[0], SpriteCallbackDummy, 0, 0, 1);
     }
     return spriteId;
 }
