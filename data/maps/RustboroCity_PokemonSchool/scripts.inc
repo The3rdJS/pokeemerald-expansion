@@ -212,36 +212,31 @@ RustboroCity_PokemonSchool_Text_ExplainPoison:
 	.string "The effects of poison remain after\n"
 	.string "a battle.\p"
 	.string "A poisoned POKéMON's HP will drop\n"
-	.string "while it is traveling.\p"
-	.string "Heal a poisoning using an ANTIDOTE.$"
+	.string "while it is traveling.$"
 
 RustboroCity_PokemonSchool_Text_ExplainParalysis:
 	.string "If a POKéMON becomes paralyzed,\n"
 	.string "its SPEED drops.\p"
 	.string "It may also not be able to move while\n"
 	.string "it is in battle.\p"
-	.string "Paralysis remains after battle.\n"
-	.string "Cure it using a PARLYZ HEAL.$"
+	.string "Paralysis remains after battle.$"
 
 RustboroCity_PokemonSchool_Text_ExplainSleep:
 	.string "If a POKéMON falls asleep, it will be\n"
 	.string "unable to attack.\p"
 	.string "A POKéMON may wake up on its own,\n"
 	.string "but if a battle ends while it is\l"
-	.string "sleeping, it will stay asleep.\p"
-	.string "Wake it up using an AWAKENING.$"
+	.string "sleeping, it will stay asleep.$"
 
 RustboroCity_PokemonSchool_Text_ExplainBurn:
 	.string "A burn reduces ATTACK power, and it\n"
 	.string "steadily reduces the victim's HP.\p"
-	.string "A burn lingers after battle.\n"
-	.string "Cure a burn using a BURN HEAL.$"
+	.string "A burn lingers after battle.$"
 
 RustboroCity_PokemonSchool_Text_ExplainFreeze:
 	.string "If a POKéMON is frozen, it becomes\n"
 	.string "completely helpless.\p"
-	.string "It will remain frozen after battle.\n"
-	.string "Thaw it out using an ICE HEAL.$"
+	.string "It will remain frozen after battle.$"
 
 RustboroCity_PokemonSchool_Text_StudentsWhoDontStudyGetQuickClaw:
 	.string "Students who don't study get a little\n"
