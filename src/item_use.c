@@ -868,8 +868,17 @@ void ItemUseOutOfBattle_PPUp(u8 taskId)
 
 void ItemUseOutOfBattle_RareCandy(u8 taskId)
 {
-    gItemUseCB = ItemUseCB_RareCandy;
-    SetUpItemUseCallback(taskId);
+    if (!gTasks[taskId].tUsingRegisteredKeyItem)
+    {
+        gItemUseCB = ItemUseCB_RareCandy;
+        gTasks[taskId].data[0] = TRUE;
+        SetUpItemUseOnFieldCallback(taskId);
+    }
+    else
+    {
+        // TODO: handle key items with callbacks to menus allow to be used by registering them.
+        DisplayDadsAdviceCannotUseItemMessage(taskId, gTasks[taskId].tUsingRegisteredKeyItem);
+    }
 }
 
 void ItemUseOutOfBattle_DynamaxCandy(u8 taskId)
