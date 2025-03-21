@@ -49,6 +49,8 @@ void Task_ItemUse_CloseMessageBoxAndReturnToField_VsSeeker(u8 taskId);
 void DisplayDadsAdviceCannotUseItemMessage(u8 taskId, bool8 isUsingRegisteredKeyItemOnField);
 void ItemUseOutOfBattle_PokeFlute(u8 taskId);
 void ItemUseOutOfBattle_TownMap(u8 taskId);
+void ItemUseOutOfBattle_Hexorb(u8);
+void ItemUseOutOfBattle_Pokevial(u8);
 
 enum {
     BALL_THROW_UNABLE_TWO_MONS,
@@ -60,6 +62,5 @@ enum {
 
 bool32 CanThrowBall(void);
 bool32 CannotUseItemsInBattle(u16 itemId, struct Pokemon *mon);
-void ItemUseOutOfBattle_Hexorb(u8);
 
 #endif // GUARD_ITEM_USE_H

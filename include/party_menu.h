@@ -109,4 +109,7 @@ void MoveDeleterChooseMoveToForget(void);
 void ItemUseCB_UseHexorb(u8 taskId, TaskFunc task);
 void InitPartyMenuForHexorbFromField(u8 taskId);
 
+void ItemUseCB_UsePokevial(u8 taskId, TaskFunc task);
+void InitPartyMenuForPokevialFromField(u8 taskId);
+
 #endif // GUARD_PARTY_MENU_H

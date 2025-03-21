@@ -14106,5 +14106,21 @@ const struct Item gItemsInfo[] =
         .effect = gItemEffect_Hexorb,
         .iconPic = gItemIcon_Hexorb,
         .iconPalette = gItemIconPalette_Hexorb,
+    },
+    
+    [ITEM_POKEVIAL] =
+    {
+        .name = _("Poké Vial"),
+        .price = 0,
+        .description = COMPOUND_STRING(
+            "Restores all\n"
+            "POKéMON to full\n"
+            "health."),
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_PARTY_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_Pokevial,
+        .effect = gItemEffect_Pokevial,
+        .iconPic = gItemIcon_Pokevial,
+        .iconPalette = gItemIconPalette_Pokevial,
     }
 };
