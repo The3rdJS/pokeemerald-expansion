@@ -1302,3 +1302,6 @@ const u8 gMenuText_Move[] = _("MOVE");
 const u8 gText_MoveItemWhere[] = _("Move {STR_VAR_2} to where?");
 const u8 gText_XsYAnd[] = _("{STR_VAR_1}'s {STR_VAR_2} and\n");
 const u8 gText_XsYWereSwapped[] = _("{STR_VAR_1}'s {STR_VAR_2} were swapped!{PAUSE_UNTIL_PRESS}");
+const u8 gText_PokevialHasDoses[] =_("The {STR_VAR_1} has {STR_VAR_2} doses remaining.\nUse the {STR_VAR_1}?");
+const u8 gText_PokevialIsEmpty[] =_("The {STR_VAR_1} is empty!\nRefill it by healing at a {STR_VAR_2}.{PAUSE_UNTIL_PRESS}");
+const u8 gText_YourPkmnWereRestored[] =_("Your POKéMON were restored to full health.{PAUSE_UNTIL_PRESS}");

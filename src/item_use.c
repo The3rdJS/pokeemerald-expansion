@@ -32,12 +32,14 @@
 #include "party_menu.h"
 #include "pokeblock.h"
 #include "pokemon.h"
+#include "pokevial.h"
 #include "script.h"
 #include "sound.h"
 #include "strings.h"
 #include "string_util.h"
 #include "task.h"
 #include "text.h"
+#include "tv.h"
 #include "vs_seeker.h"
 #include "constants/event_bg.h"
 #include "constants/event_objects.h"
@@ -94,6 +96,13 @@ static const u8 sText_UsedVar2WildRepelled[] = _("{PLAYER} used the\n{STR_VAR_2}
 static const u8 sText_PlayedPokeFluteCatchy[] = _("Played the POKé FLUTE.\pNow, that's a catchy tune!{PAUSE_UNTIL_PRESS}");
 static const u8 sText_PlayedPokeFlute[] = _("Played the POKé FLUTE.");
 static const u8 sText_PokeFluteAwakenedMon[] = _("The POKé FLUTE awakened sleeping\nPOKéMON.{PAUSE_UNTIL_PRESS}");
+
+static void UsePokevialFieldYes(u8 taskId);
+static void Task_UsePokevialFieldYes(u8 taskId);
+static void UsePokevialFieldNo(u8 taskId);
+static void UsePokevialYesNo(u8);
+static void UsePokevialYes(u8);
+void ItemUseOutOfBattle_Pokevial(u8);
 
 // EWRAM variables
 EWRAM_DATA static void(*sItemUseOnFieldCB)(u8 taskId) = NULL;
@@ -1614,6 +1623,96 @@ void Task_OpenRegisteredHexorb(u8 taskId)
         InitPartyMenuForHexorbFromField(taskId);
         DestroyTask(taskId);
     }
+}
+
+static const struct YesNoFuncTable sUsePokevialYesNoFuncTable =
+{
+    .yesFunc = UsePokevialYes,
+    .noFunc = CloseItemMessage,
+};
+
+static const struct YesNoFuncTable sYesNoTable_PokevialFieldFuncTable =
+{
+    .yesFunc = UsePokevialFieldYes,
+    .noFunc = UsePokevialFieldNo,
+};
+
+static void UsePokevialYesNo(u8 taskId)
+{
+    BagMenu_YesNo(taskId, ITEMWIN_YESNO_HIGH, &sUsePokevialYesNoFuncTable);
+}
+
+static void UsePokevialFieldYesNo(u8 taskId)
+{
+    DisplayYesNoMenuDefaultYes();
+    DoYesNoFuncWithChoice(taskId, &sYesNoTable_PokevialFieldFuncTable);
+}
+
+static void UsePokevialYes(u8 taskId)
+{
+    gItemUseCB = ItemUseCB_UsePokevial;
+    SetUpItemUseCallback(taskId);
+}
+
+static void UsePokevialFieldYes(u8 taskId)
+{
+    LockPlayerFieldControls();
+    FadeScreen(FADE_TO_BLACK,0);
+    CreateTask(Task_UsePokevialFieldYes, 1);
+}
+
+static void Task_UsePokevialFieldYes(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        CleanupOverworldWindowsAndTilemaps();
+        InitPartyMenuForPokevialFromField(taskId);
+        DestroyTask(taskId);
+    }
+}
+
+static void UsePokevialFieldNo(u8 taskId)
+{
+    ClearDialogWindowAndFrame(0, FALSE);
+    DestroyTask(taskId);
+    ScriptContext_Enable();
+}
+
+void PokevialPrintDosesAndConfirmMessage(u32 currentDoses, bool32 isPlayerUsingRegisteredKeyItem, u8 taskId)
+{
+    u32 numDigits = CountDigits(currentDoses);
+
+    ConvertIntToDecimalStringN(gStringVar2, currentDoses, STR_CONV_MODE_LEFT_ALIGN, numDigits);
+    StringExpandPlaceholders(gStringVar4, gText_PokevialHasDoses);
+
+    if (isPlayerUsingRegisteredKeyItem)
+        DisplayItemMessageOnField(taskId, gStringVar4, UsePokevialFieldYesNo);
+    else
+        DisplayItemMessage(taskId, FONT_NORMAL, gStringVar4, UsePokevialYesNo);
+}
+
+void PokevialPrintNoDosesMessage(bool32 isPlayerUsingRegisteredKeyItem, u8 taskId)
+{
+    StringCopy(gStringVar2, gText_PokemonCenter);
+    StringExpandPlaceholders(gStringVar4, gText_PokevialIsEmpty);
+
+    if (isPlayerUsingRegisteredKeyItem)
+        DisplayItemMessageOnField(taskId, gStringVar4, Task_CloseCantUseKeyItemMessage);
+    else
+        DisplayItemMessage(taskId,FONT_NORMAL,gStringVar4,CloseItemMessage);
+}
+
+void ItemUseOutOfBattle_Pokevial(u8 taskId)
+{
+    u32 currentDoses = PokevialGetDose();
+    bool32 isPlayerUsingRegisteredKeyItem = gTasks[taskId].tUsingRegisteredKeyItem;
+
+    CopyItemName(ITEM_POKEVIAL, gStringVar1);
+
+    if (currentDoses > EMPTY_VIAL)
+        PokevialPrintDosesAndConfirmMessage(currentDoses, isPlayerUsingRegisteredKeyItem, taskId);
+    else
+        PokevialPrintNoDosesMessage(isPlayerUsingRegisteredKeyItem, taskId);
 }
 
 #undef tUsingRegisteredKeyItem

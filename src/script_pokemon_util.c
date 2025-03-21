@@ -18,6 +18,7 @@
 #include "pokedex.h"
 #include "pokemon.h"
 #include "pokemon_storage_system.h"
+#include "pokevial.h"
 #include "random.h"
 #include "script.h"
 #include "sprite.h"
@@ -43,6 +44,8 @@ void HealPlayerParty(void)
     // Recharge Tera Orb, if possible.
     if (B_FLAG_TERA_ORB_CHARGED != 0 && CheckBagHasItem(ITEM_TERA_ORB, 1))
         FlagSet(B_FLAG_TERA_ORB_CHARGED);
+	
+    PokevialRefill();
 }
 
 static void HealPlayerBoxes(void)
