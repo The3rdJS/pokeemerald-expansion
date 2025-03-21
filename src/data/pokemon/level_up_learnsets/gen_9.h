@@ -6897,7 +6897,7 @@ static const struct LevelUpMove sNuzleafLevelUpLearnset[] = {
     LEVEL_UP_MOVE( 1, MOVE_FAKE_OUT),
     LEVEL_UP_MOVE( 1, MOVE_TORMENT),
     LEVEL_UP_MOVE( 1, MOVE_ASTONISH),
-    LEVEL_UP_MOVE( 9, MOVE_GROWTH),
+    LEVEL_UP_MOVE( 9, MOVE_BIDE),
     LEVEL_UP_MOVE(12, MOVE_ROLLOUT),
     LEVEL_UP_END
 };
