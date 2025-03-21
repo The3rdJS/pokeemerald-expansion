@@ -3393,4 +3393,7 @@ extern const u32 gBattleIcons_Gfx2[];
 extern const u32 gBattleIcons_Pal1[];
 extern const u32 gBattleIcons_Pal2[];
 
+extern const u32 gItemIcon_Hexorb[];
+extern const u32 gItemIconPalette_Hexorb[];
+
 #endif //GUARD_GRAPHICS_H
