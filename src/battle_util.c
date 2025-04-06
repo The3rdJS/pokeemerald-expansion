@@ -3254,63 +3254,6 @@ static void CancellerFrozen(u32 *effect)
     }
 }
 
-static void CancellerObedience(u32 *effect)
-{
-    u32 obedienceResult = GetAttackerObedienceForAction();
-    if (obedienceResult != OBEYS
-     && !(gHitMarker & HITMARKER_NO_PPDEDUCT) // Don't check obedience after first hit of multi target move or multi hit moves
-     && !(gBattleMons[gBattlerAttacker].status2 & STATUS2_MULTIPLETURNS))
-    {
-        switch (obedienceResult)
-        {
-        case DISOBEYS_LOAFS:
-            // Randomly select, then print a disobedient string
-            // B_MSG_LOAFING, B_MSG_WONT_OBEY, B_MSG_TURNED_AWAY, or B_MSG_PRETEND_NOT_NOTICE
-            gBattleCommunication[MULTISTRING_CHOOSER] = MOD(Random(), NUM_LOAF_STRINGS);
-            gBattlescriptCurrInstr = BattleScript_MoveUsedLoafingAround;
-            gBattleStruct->moveResultFlags[gBattlerTarget] |= MOVE_RESULT_MISSED;
-            break;
-        case DISOBEYS_HITS_SELF:
-            gBattlerTarget = gBattlerAttacker;
-            struct DamageCalculationData damageCalcData;
-            damageCalcData.battlerAtk = damageCalcData.battlerDef = gBattlerAttacker;
-            damageCalcData.move = MOVE_NONE;
-            damageCalcData.moveType = TYPE_MYSTERY;
-            damageCalcData.isCrit = FALSE;
-            damageCalcData.randomFactor = FALSE;
-            damageCalcData.updateFlags = TRUE;
-            gBattleStruct->moveDamage[gBattlerAttacker] = CalculateMoveDamage(&damageCalcData, 40);
-            gBattlescriptCurrInstr = BattleScript_IgnoresAndHitsItself;
-            gHitMarker |= HITMARKER_UNABLE_TO_USE_MOVE;
-            gHitMarker |= HITMARKER_OBEYS;
-            break;
-        case DISOBEYS_FALL_ASLEEP:
-            if (IsSleepClauseEnabled())
-                gBattleStruct->battlerState[gBattlerAttacker].sleepClauseEffectExempt = TRUE;
-            gBattlescriptCurrInstr = BattleScript_IgnoresAndFallsAsleep;
-            gBattleStruct->moveResultFlags[gBattlerTarget] |= MOVE_RESULT_MISSED;
-            break;
-        case DISOBEYS_WHILE_ASLEEP:
-            gBattlescriptCurrInstr = BattleScript_IgnoresWhileAsleep;
-            gBattleStruct->moveResultFlags[gBattlerTarget] |= MOVE_RESULT_MISSED;
-            break;
-        case DISOBEYS_RANDOM_MOVE:
-            gCalledMove = gBattleMons[gBattlerAttacker].moves[gCurrMovePos];
-            SetAtkCancellerForCalledMove();
-            gBattlescriptCurrInstr = BattleScript_IgnoresAndUsesRandomMove;
-            gBattlerTarget = GetBattleMoveTarget(gCalledMove, NO_TARGET_OVERRIDE);
-            gHitMarker |= HITMARKER_DISOBEDIENT_MOVE;
-            gHitMarker |= HITMARKER_OBEYS;
-            break;
-        }
-        *effect = 1;
-    }
-    else
-    {
-        gHitMarker |= HITMARKER_OBEYS;
-    }
-}
-
 static void CancellerTruant(u32 *effect)
 {
     if (GetBattlerAbility(gBattlerAttacker) == ABILITY_TRUANT && gDisableStructs[gBattlerAttacker].truantCounter)
@@ -3804,7 +3747,6 @@ static const MoveSuccessOrderCancellers sMoveSuccessOrderCancellers[] =
     [CANCELLER_RECHARGE] = CancellerRecharge,
     [CANCELLER_ASLEEP] = CancellerAsleep,
     [CANCELLER_FROZEN] = CancellerFrozen,
-    [CANCELLER_OBEDIENCE] = CancellerObedience,
     [CANCELLER_TRUANT] = CancellerTruant,
     [CANCELLER_FLINCH] = CancellerFlinch,
     [CANCELLER_IN_LOVE] = CancellerInLove,
@@ -8573,109 +8515,6 @@ u32 GetBattleMoveTarget(u16 move, u8 setTarget)
     gBattleStruct->moveTarget[gBattlerAttacker] = targetBattler;
 
     return targetBattler;
-}
-
-u8 GetAttackerObedienceForAction()
-{
-    s32 rnd;
-    s32 calc;
-    u8 obedienceLevel = 0;
-    u8 levelReferenced;
-
-    if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_RECORDED_LINK))
-        return OBEYS;
-    if (BattlerHasAi(gBattlerAttacker))
-        return OBEYS;
-
-    if (gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER && GetBattlerPosition(gBattlerAttacker) == B_POSITION_PLAYER_RIGHT)
-        return OBEYS;
-    if (gBattleTypeFlags & BATTLE_TYPE_FRONTIER)
-        return OBEYS;
-    if (gBattleTypeFlags & BATTLE_TYPE_RECORDED)
-        return OBEYS;
-    if (B_OBEDIENCE_MECHANICS < GEN_8 && !IsOtherTrainer(gBattleMons[gBattlerAttacker].otId, gBattleMons[gBattlerAttacker].otName))
-        return OBEYS;
-    if (FlagGet(FLAG_BADGE08_GET)) // Rain Badge, ignore obedience altogether
-        return OBEYS;
-
-    obedienceLevel = 10;
-
-    if (FlagGet(FLAG_BADGE01_GET)) // Stone Badge
-        obedienceLevel = 20;
-    if (FlagGet(FLAG_BADGE02_GET)) // Knuckle Badge
-        obedienceLevel = 30;
-    if (FlagGet(FLAG_BADGE03_GET)) // Dynamo Badge
-        obedienceLevel = 40;
-    if (FlagGet(FLAG_BADGE04_GET)) // Heat Badge
-        obedienceLevel = 50;
-    if (FlagGet(FLAG_BADGE05_GET)) // Balance Badge
-        obedienceLevel = 60;
-    if (FlagGet(FLAG_BADGE06_GET)) // Feather Badge
-        obedienceLevel = 70;
-    if (FlagGet(FLAG_BADGE07_GET)) // Mind Badge
-        obedienceLevel = 80;
-
-    if (B_OBEDIENCE_MECHANICS >= GEN_8
-     && !IsOtherTrainer(gBattleMons[gBattlerAttacker].otId, gBattleMons[gBattlerAttacker].otName))
-        levelReferenced = gBattleMons[gBattlerAttacker].metLevel;
-    else
-        levelReferenced = gBattleMons[gBattlerAttacker].level;
-
-    if (levelReferenced <= obedienceLevel)
-        return OBEYS;
-
-    rnd = Random();
-    calc = (levelReferenced + obedienceLevel) * (rnd & 255) >> 8;
-    if (calc < obedienceLevel)
-        return OBEYS;
-
-    //  Clear the Z-Move flags if the battler is disobedient as to not waste the Z-Move
-    if (GetActiveGimmick(gBattlerAttacker) == GIMMICK_Z_MOVE)
-    {
-        gBattleStruct->gimmick.activated[gBattlerAttacker][GIMMICK_Z_MOVE] = FALSE;
-        gBattleStruct->gimmick.activeGimmick[GetBattlerSide(gBattlerAttacker)][gBattlerPartyIndexes[gBattlerAttacker]] = GIMMICK_NONE;
-    }
-
-    // is not obedient
-    if (gCurrentMove == MOVE_RAGE)
-        gBattleMons[gBattlerAttacker].status2 &= ~STATUS2_RAGE;
-    u32 moveEffect = GetMoveEffect(gCurrentMove);
-    if (gBattleMons[gBattlerAttacker].status1 & STATUS1_SLEEP && (moveEffect == EFFECT_SNORE || moveEffect == EFFECT_SLEEP_TALK))
-        return DISOBEYS_WHILE_ASLEEP;
-
-    calc = (levelReferenced + obedienceLevel) * ((rnd >> 8) & 255) >> 8;
-    if (calc < obedienceLevel)
-    {
-        calc = CheckMoveLimitations(gBattlerAttacker, 1u << gCurrMovePos, MOVE_LIMITATIONS_ALL);
-        if (calc == ALL_MOVES_MASK) // all moves cannot be used
-            return DISOBEYS_LOAFS;
-        else // use a random move
-            do
-                gCurrMovePos = gChosenMovePos = MOD(Random(), MAX_MON_MOVES);
-            while ((1u << gCurrMovePos) & calc);
-        return DISOBEYS_RANDOM_MOVE;
-    }
-    else
-    {
-        obedienceLevel = levelReferenced - obedienceLevel;
-
-        calc = ((rnd >> 16) & 255);
-        if (calc < obedienceLevel && CanBeSlept(gBattlerAttacker, GetBattlerAbility(gBattlerAttacker), NOT_BLOCKED_BY_SLEEP_CLAUSE))
-        {
-            // try putting asleep
-            int i;
-            for (i = 0; i < gBattlersCount; i++)
-                if (gBattleMons[i].status2 & STATUS2_UPROAR)
-                    break;
-            if (i == gBattlersCount)
-                return DISOBEYS_FALL_ASLEEP;
-        }
-        calc -= obedienceLevel;
-        if (calc < obedienceLevel)
-            return DISOBEYS_HITS_SELF;
-        else
-            return DISOBEYS_LOAFS;
-    }
 }
 
 u32 GetBattlerHoldEffect(u32 battler, bool32 checkNegating)

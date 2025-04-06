@@ -80,6 +80,7 @@ static void PlayerHandleLinkStandbyMsg(u32 battler);
 static void PlayerHandleResetActionMoveSelection(u32 battler);
 static void PlayerHandleEndLinkBattle(u32 battler);
 static void PlayerHandleBattleDebug(u32 battler);
+static void MoveSelectionDisplayCategoryIcon(u32 battler);
 
 static void PlayerBufferRunCommand(u32 battler);
 static void MoveSelectionDisplayPpNumber(u32 battler);
@@ -1740,6 +1741,8 @@ static void MoveSelectionDisplayMoveType(u32 battler)
 
     PrependFontIdToFit(txtPtr, end, FONT_NORMAL, WindowWidthPx(B_WIN_MOVE_TYPE) - 25);
     BattlePutTextOnWindow(gDisplayedStringBattle, B_WIN_MOVE_TYPE);
+	
+    MoveSelectionDisplayCategoryIcon(battler);
 }
 
 static void TryMoveSelectionDisplayMoveDescription(u32 battler)
@@ -2385,4 +2388,19 @@ static void PlayerHandleBattleDebug(u32 battler)
     BeginNormalPaletteFade(-1, 0, 0, 0x10, 0);
     SetMainCallback2(CB2_BattleDebugMenu);
     gBattlerControllerFuncs[battler] = Controller_WaitForDebug;
+}
+
+static void MoveSelectionDisplayCategoryIcon(u32 battler)
+{
+	static const u16 sCategoryIcons_Pal[] = INCBIN_U16("graphics/battle_interface/category_icons.gbapal");
+	static const u8 sCategoryIcons_Gfx[] = INCBIN_U8("graphics/battle_interface/category_icons.4bpp");
+	struct ChooseMoveStruct *moveInfo;
+	int icon;
+
+	moveInfo = (struct ChooseMoveStruct*)(&gBattleResources->bufferA[battler][4]);
+	icon = GetBattleMoveCategory(moveInfo->moves[gMoveSelectionCursor[battler]]);
+	LoadPalette(sCategoryIcons_Pal, 10 * 0x10, 0x20);
+	BlitBitmapToWindow(B_WIN_CATEGORY_ICON, sCategoryIcons_Gfx + 0x80 * icon, 0, 0, 16, 16);
+	PutWindowTilemap(B_WIN_CATEGORY_ICON);
+	CopyWindowToVram(B_WIN_CATEGORY_ICON, 3);
 }
