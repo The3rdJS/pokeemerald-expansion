@@ -16631,7 +16631,7 @@ const struct MoveInfo gMovesInfo[MOVES_COUNT_ALL] =
         .name = COMPOUND_STRING("Aurora Veil"),
         .description = COMPOUND_STRING(
             "Weakens all attacks, but\n"
-            "only usable with hail."),
+            "only usable with snow."),
         .effect = EFFECT_AURORA_VEIL,
         .power = 0,
         .type = TYPE_ICE,
