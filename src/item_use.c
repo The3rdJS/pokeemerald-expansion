@@ -872,7 +872,27 @@ void ItemUseOutOfBattle_PPUp(u8 taskId)
 void ItemUseOutOfBattle_RareCandy(u8 taskId)
 {
     gItemUseCB = ItemUseCB_RareCandy;
-    SetUpItemUseCallback(taskId);
+
+    if (gTasks[taskId].tUsingRegisteredKeyItem != TRUE)
+    {
+        SetUpItemUseCallback(taskId);
+    }
+    else
+    {
+        gFieldCallback = FieldCB_ReturnToFieldNoScript;
+        FadeScreen(FADE_TO_BLACK, 0);
+        gTasks[taskId].func = Task_OpenRegisteredRareCandy;
+    }
+}
+
+void Task_OpenRegisteredRareCandy(u8 taskId)
+{
+    if (!gPaletteFade.active)
+    {
+        CleanupOverworldWindowsAndTilemaps();
+        InitPartyMenuForRareCandyFromField(taskId);
+        DestroyTask(taskId);
+    }
 }
 
 void ItemUseOutOfBattle_DynamaxCandy(u8 taskId)
