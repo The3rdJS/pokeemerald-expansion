@@ -1514,7 +1514,7 @@ static void Task_HandleSwappingItemsInput(u8 taskId)
 
     if (MenuHelpers_ShouldWaitForLinkRecv() != TRUE)
     {
-        if (JOY_NEW(SELECT_BUTTON))
+        if (JOY_NEW(START_BUTTON))
         {
             PlaySE(SE_SELECT);
             ListMenuGetScrollAndRow(tListTaskId, &gBagPosition.scrollPosition[gBagPosition.pocket], &gBagPosition.cursorPosition[gBagPosition.pocket]);
