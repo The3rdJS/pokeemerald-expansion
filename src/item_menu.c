@@ -3607,6 +3607,8 @@ static const u16 sItemsByType[] =
     ITEM_POKESHI_DOLL,
 
     ITEM_STRANGE_BALL,
+
+    ITEM_HEXORB
 };
 
 static void AddBagSortSubMenu(void)
