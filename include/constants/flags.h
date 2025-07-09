@@ -44,7 +44,7 @@
 #define NUM_TEMP_FLAGS   (TEMP_FLAGS_END - TEMP_FLAGS_START + 1)
 
 #define OW_FLAG_NO_ENCOUNTER 0x20 // If this flag is set, wild encounters will be disabled.
-#define FLAG_UNUSED_0x021    0x21 // Unused Flag
+#define B_FLAG_NO_BAG_USE    0x21 // If this flag is set, bag use will be disabled.
 #define FLAG_UNUSED_0x022    0x22 // Unused Flag
 #define FLAG_UNUSED_0x023    0x23 // Unused Flag
 #define FLAG_UNUSED_0x024    0x24 // Unused Flag
