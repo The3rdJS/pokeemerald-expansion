@@ -2484,7 +2484,7 @@ static void MoveSelectionDisplayMoveEffectiveness(u32 foeEffectiveness, u32 batt
     struct ChooseMoveStruct *moveInfo = (struct ChooseMoveStruct *)(&gBattleResources->bufferA[battler][4]);
     u8 *txtPtr;
 
-    txtPtr = StringCopy(gDisplayedStringBattle, gText_MoveInterfacePP);
+    txtPtr = StringCopy(gDisplayedStringBattle, noIcon);
 
     if (!IsBattleMoveStatus(moveInfo->moves[gMoveSelectionCursor[battler]]))
     {
