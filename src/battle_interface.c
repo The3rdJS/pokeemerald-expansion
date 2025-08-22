@@ -1808,15 +1808,7 @@ static void UpdateStatusIconInHealthbox(u8 healthboxSpriteId)
     if (IsOnPlayerSide(battler))
     {
         status = GetMonData(GetBattlerMon(battler), MON_DATA_STATUS);
-        switch (GetBattlerCoordsIndex(battler))
-        {
-        case BATTLE_COORDS_SINGLES:
-            tileNumAdder = 0x1A;
-            break;
-        default:
-            tileNumAdder = 0x12;
-            break;
-        }
+        tileNumAdder = 0x12;
     }
     else
     {
@@ -1874,14 +1866,6 @@ static void UpdateStatusIconInHealthbox(u8 healthboxSpriteId)
     FillPalette(sStatusIconColors[statusPalId], OBJ_PLTT_OFFSET + pltAdder, PLTT_SIZEOF(1));
     CpuCopy16(&gPlttBufferUnfaded[OBJ_PLTT_OFFSET + pltAdder], (u16 *)OBJ_PLTT + pltAdder, PLTT_SIZEOF(1));
     CpuCopy32(statusGfxPtr, (void *)(OBJ_VRAM0 + (gSprites[healthboxSpriteId].oam.tileNum + tileNumAdder) * TILE_SIZE_4BPP), 96);
-    if (GetBattlerCoordsIndex(battler) == BATTLE_COORDS_DOUBLES || !IsOnPlayerSide(battler))
-    {
-        if (!gBattleSpritesDataPtr->battlerData[battler].hpNumbersNoBars)
-        {
-            CpuCopy32(GetHealthboxElementGfxPtr(HEALTHBOX_GFX_0), (void *)(OBJ_VRAM0 + gSprites[healthBarSpriteId].oam.tileNum * TILE_SIZE_4BPP), 32);
-            CpuCopy32(GetHealthboxElementGfxPtr(HEALTHBOX_GFX_65), (void *)(OBJ_VRAM0 + (gSprites[healthBarSpriteId].oam.tileNum + 1) * TILE_SIZE_4BPP), 32);
-        }
-    }
     TryAddPokeballIconToHealthbox(healthboxSpriteId, FALSE);
 }
 
@@ -2537,7 +2521,7 @@ static void ClearAbilityName(u8 spriteId1, u8 spriteId2)
                         (void*)(OBJ_VRAM0) + (gSprites[spriteId2].oam.tileNum * 32) + 256,
                         5, 12,
                         4,
-                        7, 9, 1);
+                        8, 11, 2);
 }
 
 static void PrintBattlerOnAbilityPopUp(u8 battler, u8 spriteId1, u8 spriteId2)
@@ -2582,7 +2566,7 @@ static void PrintBattlerOnAbilityPopUp(u8 battler, u8 spriteId1, u8 spriteId2)
                         (void*)(OBJ_VRAM0) + (gSprites[spriteId2].oam.tileNum * 32),
                         5, 12,
                         0,
-                        2, 7, 1);
+                        9, 11, 1);
 }
 
 static void PrintAbilityOnAbilityPopUp(u32 ability, u8 spriteId1, u8 spriteId2)
@@ -2593,7 +2577,7 @@ static void PrintAbilityOnAbilityPopUp(u32 ability, u8 spriteId1, u8 spriteId2)
                         (void*)(OBJ_VRAM0) + (gSprites[spriteId2].oam.tileNum * 32) + 256,
                         5, 12,
                         4,
-                        7, 9, 1);
+                        8, 11, 2);
 }
 
 #define PIXEL_COORDS_TO_OFFSET(x, y)(            \
@@ -3271,11 +3255,11 @@ void ArrowsChangeColorLastBallCycle(bool32 showArrows)
     if (gBattleStruct->ballSpriteIds[1] == MAX_SPRITES)
         return;
     paletteNum *= 16;
-    pltArrow = (struct PlttData *)&gPlttBufferFaded[paletteNum + 9];  // Arrow color is in idx 9
-    pltOutline = (struct PlttData *)&gPlttBufferFaded[paletteNum + 8];  // Arrow outline is in idx 8
+    pltArrow = (struct PlttData *)&gPlttBufferFaded[paletteNum + 4];  // Arrow color is in idx 4
+    pltOutline = (struct PlttData *)&gPlttBufferFaded[paletteNum + 5];  // Arrow outline is in idx 5
     if (!showArrows) //Make invisible
     {
-        defaultPlttArrow = (struct PlttData *)&gPlttBufferFaded[paletteNum + 13];  // Background color is idx 13
+        defaultPlttArrow = (struct PlttData *)&gPlttBufferFaded[paletteNum + 9];  // Background color is idx 9
         pltArrow->r = defaultPlttArrow->r;
         pltArrow->g = defaultPlttArrow->g;
         pltArrow->b = defaultPlttArrow->b;
