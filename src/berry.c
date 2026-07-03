@@ -14,6 +14,7 @@
 #include "string_util.h"
 #include "text.h"
 #include "constants/event_object_movement.h"
+#include "constants/map_groups.h"
 #include "constants/items.h"
 
 static u8 BerryTreeGetNumStagesWatered(struct BerryTree *tree);
@@ -2717,7 +2718,14 @@ static u32 GetBerryTreeAge(u8 id, u8 stage)
 
 static u8 GetBerryCountByBerryTreeId(u8 id)
 {
-    return gSaveBlock1Ptr->berryTrees[id].berryYield;
+    struct BerryTree *tree = GetBerryTreeInfo(id);
+    const struct BerryInfo *berryInfo = GetBerryInfo(tree->berry);
+    u16 currentMap = gMapHeader.regionMapSectionId;
+
+    if (currentMap == MAPSEC_ROUTE_119 || currentMap == MAPSEC_ROUTE_120)
+        return berryInfo->maxYield;
+    else
+        return gSaveBlock1Ptr->berryTrees[id].berryYield;
 }
 
 static u16 GetStageDurationByBerryType(u8 berry)
