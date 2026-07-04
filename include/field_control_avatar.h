@@ -38,6 +38,8 @@ void CancelSignPostMessageBox(struct FieldInput *input);
 void HandleBoulderFallThroughHole(struct ObjectEvent *object);
 void HandleBoulderActivateVictoryRoadSwitch(u16 x, u16 y);
 bool8 TryStartStepBasedScript(struct MapPosition *, u16, enum Direction);
+extern const u8 EventScript_DisableAutoRun[];
+extern const u8 EventScript_EnableAutoRun[];
 
 #define NOT_SIGNPOST 0
 #define WALK_AWAY_SIGNPOST_FRAMES 6

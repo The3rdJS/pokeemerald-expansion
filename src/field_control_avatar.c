@@ -84,6 +84,7 @@ static void SetMsgSignPostAndVarFacing(enum Direction playerDirection);
 static void SetUpWalkIntoSignScript(const u8 *script, enum Direction playerDirection);
 static u32 GetFacingSignpostType(u16 metatileBehvaior, enum Direction direction);
 static const u8 *GetSignpostScriptAtMapPosition(struct MapPosition *position);
+static bool8 EnableAutoRun(void);
 
 void FieldClearPlayerInput(struct FieldInput *input)
 {
@@ -237,7 +238,7 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
     if (input->pressedSelectButton && UseRegisteredKeyItemOnField() == TRUE)
         return TRUE;
 
-    if (input->pressedRButton && TryStartDexNavSearch())
+    if (input->pressedRButton && EnableAutoRun())
         return TRUE;
 
     if (input->input_field_1_2 && DEBUG_OVERWORLD_MENU && !DEBUG_OVERWORLD_IN_MENU)
@@ -1427,4 +1428,24 @@ void HandleBoulderActivateVictoryRoadSwitch(u16 x, u16 y)
             }
         }
     }
+}
+
+static bool8 EnableAutoRun(void)
+{
+    if (!FlagGet(FLAG_SYS_B_DASH))
+        return FALSE;
+
+    PlaySE(SE_SELECT);
+    if (gSaveBlock2Ptr->autoRun)
+    {
+        gSaveBlock2Ptr->autoRun = FALSE;
+        ScriptContext_SetupScript(EventScript_DisableAutoRun);
+    }
+    else
+    {
+        gSaveBlock2Ptr->autoRun = TRUE;
+        ScriptContext_SetupScript(EventScript_EnableAutoRun);
+    }
+
+    return TRUE;
 }
