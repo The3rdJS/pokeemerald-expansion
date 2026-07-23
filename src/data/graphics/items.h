@@ -2115,3 +2115,6 @@ const u16 gItemIconPalette_TwiceSpicedRadish[] = INCGFX_U16("graphics/items/icon
 
 const u32 gItemIcon_CandyJar[] = INCGFX_U32("graphics/items/icons/candy_jar.png", ".4bpp.smol");
 const u16 gItemIconPalette_CandyJar[] = INCGFX_U16("graphics/items/icon_palettes/candy_jar.pal", ".gbapal");
+
+const u32 gItemIcon_HexOrb[] = INCGFX_U32("graphics/items/icons/hex_orb.png", ".4bpp.smol");
+const u16 gItemIconPalette_HexOrb[] = INCGFX_U16("graphics/items/icon_palettes/hex_orb.pal", ".gbapal");

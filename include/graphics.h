@@ -1773,6 +1773,8 @@ extern const u32 gItemIcon_TwiceSpicedRadish[];
 extern const u16 gItemIconPalette_TwiceSpicedRadish[];
 extern const u32 gItemIcon_CandyJar[];
 extern const u16 gItemIconPalette_CandyJar[];
+extern const u32 gItemIcon_HexOrb[];
+extern const u16 gItemIconPalette_HexOrb[];
 
 extern const u32 gItemIcon_ReturnToFieldArrow[];
 extern const u16 gItemIconPalette_ReturnToFieldArrow[];

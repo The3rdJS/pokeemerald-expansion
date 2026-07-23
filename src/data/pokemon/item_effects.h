@@ -174,6 +174,10 @@ const u8 gItemEffect_SacredAsh[7] = {
     [6] = ITEM6_HEAL_HP_FULL,
 };
 
+const u8 gItemEffect_HexOrb[7] = {
+    [0] = ITEM0_HEX_ORB,
+};
+
 #define VITAMIN_FRIENDSHIP_CHANGE(i)             \
     [(i) + 0] = 5, /* Friendship change, low */  \
     [(i) + 1] = 3, /* Friendship change, mid */  \

@@ -141,6 +141,8 @@ void BufferMoveDeleterNicknameAndMove(void);
 void GetNumMovesSelectedMonHas(void);
 void MoveDeleterChooseMoveToForget(void);
 void ItemUseCB_PokeBall(u8 taskId, TaskFunc task);
+void ItemUseCB_UseHexOrb(u8 taskId, TaskFunc task);
+void InitPartyMenuForHexOrbFromField(u8 taskId);
 
 bool32 SetUpFieldMove_Surf(void);
 bool32 SetUpFieldMove_Fly(void);

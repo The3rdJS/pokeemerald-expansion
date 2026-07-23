@@ -15874,6 +15874,23 @@ const struct ItemInfo gItemsInfo[] =
         .iconPic = gItemIcon_CandyJar,
         .iconPalette = gItemIconPalette_CandyJar,
     },
+
+    [ITEM_HEX_ORB] =
+    {
+        .name = ITEM_NAME("Hex Orb"),
+        .price = 0,
+        .importance = 1,
+        .description = COMPOUND_STRING(
+            "A purple orb\n"
+            "said to contain a\n"
+            "cursed power."),
+        .pocket = POCKET_KEY_ITEMS,
+        .type = ITEM_USE_PARTY_MENU,
+        .fieldUseFunc = ItemUseOutOfBattle_HexOrb,
+        .effect = gItemEffect_HexOrb,
+        .iconPic = gItemIcon_HexOrb,
+        .iconPalette = gItemIconPalette_HexOrb,
+    },
 };
 
 #undef ITEM_NAME

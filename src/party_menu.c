@@ -30,6 +30,7 @@
 #include "frontier_util.h"
 #include "gpu_regs.h"
 #include "graphics.h"
+#include "hex_orb.h"
 #include "international_string_util.h"
 #include "item.h"
 #include "item_menu.h"
@@ -110,6 +111,11 @@ enum {
     MENU_CATALOG_MOWER,
     MENU_CHANGE_FORM,
     MENU_CHANGE_ABILITY,
+    MENU_INFLICT_BURN,
+    MENU_INFLICT_POISON,
+    MENU_INFLICT_FREEZE,
+    MENU_INFLICT_PARALYSIS,
+    MENU_INFLICT_SLEEP,
     MENU_FIELD_MOVES
 };
 
@@ -131,6 +137,7 @@ enum {
     ACTIONS_TAKEITEM_TOSS,
     ACTIONS_ROTOM_CATALOG,
     ACTIONS_ZYGARDE_CUBE,
+    ACTIONS_HEX_ORB,
 };
 
 enum {
@@ -504,6 +511,11 @@ static void Task_FirstBattleEnterParty_FadeNormal(u8 taskId);
 static void Task_FirstBattleEnterParty_WaitFadeNormal(u8 taskId);
 static u8 CombinedToIndividualPartyId(u8 index);
 static u8 IndividualToCombinedPartyId(u8 index, enum BattlerId battler);
+static void TryHexOrbAndPrintResult(u8);
+static void DisplayHexOrbResult(u8, u32, enum HexOrbResultCodes, struct Pokemon*);
+static void Task_RetryHexOrbAfterFailedStatus(u8);
+static void Task_RetryHexOrbAfterFailedMon(u8);
+static void DisplayHexOrbMessageAndScheduleTask(u8, const u8*, TaskFunc, bool32);
 
 static const u8 sText_askText[] = _("Would you like to change {STR_VAR_1}'s\nability to {STR_VAR_2}?");
 static const u8 sText_doneText[] = _("{STR_VAR_1}'s ability became\n{STR_VAR_2}!{PAUSE_UNTIL_PRESS}");
@@ -2836,6 +2848,9 @@ void DisplayPartyMenuStdMessage(u32 stringId)
         case PARTY_MSG_WHICH_APPLIANCE:
             *windowPtr = AddWindow(&sOrderWhichApplianceMsgWindowTemplate);
             break;
+        case PARTY_MSG_WHICH_STATUS:
+            *windowPtr = AddWindow(&sInflictWhichStatusMsgWindowTemplate);
+            break;
         default:
             *windowPtr = AddWindow(&sDefaultPartyMsgWindowTemplate);
             break;
@@ -2900,6 +2915,9 @@ static u8 DisplaySelectionWindow(u8 windowType)
         break;
     case SELECTWINDOW_ZYGARDECUBE:
         window = sZygardeCubeSelectWindowTemplate;
+        break;
+    case SELECTWINDOW_HEX_ORB:
+        window = sHexOrbSelectWindowTemplate;
         break;
     default: // SELECTWINDOW_MOVES
         window = sMoveSelectWindowTemplate;
@@ -7022,6 +7040,8 @@ enum ItemEffectType GetItemEffectType(enum Item item)
         return ITEM_EFFECT_SACRED_ASH;
     else if (itemEffect[3] & ITEM3_LEVEL_UP)
         return ITEM_EFFECT_RAISE_LEVEL;
+    else if (itemEffect[0] & ITEM0_HEX_ORB)
+        return ITEM_EFFECT_HEX_ORB;
 
     statusCure = itemEffect[3] & ITEM3_STATUS_ALL;
     if (statusCure || (itemEffect[0] >> 7))
@@ -8679,4 +8699,103 @@ void ItemUseCB_PokeBall(u8 taskId, TaskFunc task)
         RemoveBagItem(newBall, 1);
         AddBagItem(currBall, 1);
     }
+}
+
+static void DisplayHexOrbMessageAndScheduleTask(u8 taskId, const u8* message, TaskFunc nextTask, bool32 useExitCallback)
+{
+    gPartyMenuUseExitCallback = useExitCallback;
+    DisplayPartyMenuMessage(message, TRUE);
+    ScheduleBgCopyTilemapToVram(2);
+    gTasks[taskId].func = nextTask;
+}
+
+void ItemUseCB_UseHexOrb(u8 taskId, TaskFunc task)
+{
+    struct Pokemon *mon = &gParties[B_TRAINER_PLAYER][gPartyMenu.slotId];
+
+    if (!GetMonData(mon, MON_DATA_HP))
+    {
+        DisplayHexOrbResult(taskId, 0, HEX_ORB_RESULT_FAIL_FAINTED, mon);
+        return;
+    }
+
+    SetPartyMonSelectionActions(gParties[B_TRAINER_PLAYER], gPartyMenu.slotId, ACTIONS_HEX_ORB);
+    DisplaySelectionWindow(SELECTWINDOW_HEX_ORB);
+    DisplayPartyMenuStdMessage(PARTY_MSG_WHICH_STATUS);
+    gTasks[taskId].data[0] = TASK_NONE;
+    gTasks[taskId].func = Task_HandleSelectionMenuInput;
+}
+
+static void TryHexOrbAndPrintResult(u8 taskId)
+{
+    s16 *data = gTasks[taskId].data;
+    u32 status = HexOrb_ConvertMenuPosToStatus(data[0]);
+    struct Pokemon *mon = &gParties[B_TRAINER_PLAYER][gPartyMenu.slotId];
+    enum HexOrbResultCodes result = (HexOrb_TryInflictStatus(mon, status));
+
+    PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[0]);
+    PartyMenuRemoveWindow(&sPartyMenuInternal->windowId[1]);
+
+    DisplayHexOrbResult(taskId, status, result, mon);
+}
+
+static void DisplayHexOrbResult(u8 taskId, u32 status, enum HexOrbResultCodes result, struct Pokemon* mon)
+{
+    switch (result)
+    {
+        case HEX_ORB_RESULT_SUCCESS:
+            PlayCry_ByMode(GetMonData(mon, MON_DATA_SPECIES), 0, CRY_MODE_WEAK);
+            HexOrb_ConstructSuccessMessage(mon, status);
+            DisplayHexOrbMessageAndScheduleTask(taskId, gStringVar4, Task_ClosePartyMenuAfterText, TRUE);
+            break;
+        case HEX_ORB_RESULT_FAIL_ABILITY:
+            PlaySE(SE_SELECT);
+            HexOrb_ConstructAbilityFailureMessage(mon,status);
+            DisplayHexOrbMessageAndScheduleTask(taskId, gStringVar4, Task_RetryHexOrbAfterFailedStatus, FALSE);
+            break;
+        case HEX_ORB_RESULT_FAIL_TYPE_0:
+        case HEX_ORB_RESULT_FAIL_TYPE_1:
+            gPartyMenuUseExitCallback = FALSE;
+            PlaySE(SE_SELECT);
+            HexOrb_ConstructTypeFailureMessage(mon, status, result);
+            DisplayHexOrbMessageAndScheduleTask(taskId, gStringVar4, Task_RetryHexOrbAfterFailedStatus, FALSE);
+            break;
+        case HEX_ORB_RESULT_FAIL_HAS_STATUS:
+            PlaySE(SE_SELECT);
+            HexOrb_ConstructStatusFailureMessage(mon);
+            DisplayHexOrbMessageAndScheduleTask(taskId, gStringVar4, Task_RetryHexOrbAfterFailedMon, FALSE);
+            break;
+        default:
+        case HEX_ORB_RESULT_FAIL_FAINTED:
+            PlaySE(SE_SELECT);
+            HexOrb_ConstructStatusFailureMessage(mon);
+            DisplayHexOrbMessageAndScheduleTask(taskId, gText_WontHaveEffect, Task_RetryHexOrbAfterFailedMon, FALSE);
+            break;
+    }
+}
+
+static void Task_RetryHexOrbAfterFailedStatus(u8 taskId)
+{
+    if (!JOY_NEW(A_BUTTON | B_BUTTON))
+        return;
+
+    ClearDialogWindowAndFrame(WIN_MSG,FALSE);
+    PlaySE(SE_SELECT);
+    ItemUseCB_UseHexOrb(taskId, Task_HandleSelectionMenuInput);
+}
+
+static void Task_RetryHexOrbAfterFailedMon(u8 taskId)
+{
+    if (!JOY_NEW(A_BUTTON | B_BUTTON))
+        return;
+
+    ClearDialogWindowAndFrame(WIN_MSG,FALSE);
+    DisplayPartyMenuStdMessage(PARTY_MSG_USE_ON_WHICH_MON);
+    PlaySE(SE_SELECT);
+    gTasks[taskId].func = Task_HandleChooseMonInput;
+}
+
+void InitPartyMenuForHexOrbFromField(u8 taskId)
+{
+    InitPartyMenu(PARTY_MENU_TYPE_FIELD, PARTY_LAYOUT_SINGLE, PARTY_ACTION_USE_ITEM, TRUE, PARTY_MSG_USE_ON_WHICH_MON, Task_HandleChooseMonInput, CB2_ReturnToField);
 }
