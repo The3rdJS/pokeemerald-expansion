@@ -2302,17 +2302,16 @@ const struct ItemInfo gItemsInfo[] =
     [ITEM_REPEL] =
     {
         .name = ITEM_NAME("Repel"),
-        .price = (I_PRICE >= GEN_7) ? 400 : 350,
-        .holdEffectParam = 100,
+        .price = 0,
+        .importance = 1,
         .description = COMPOUND_STRING(
-            "Repels weak wild\n"
-            "Pokémon for 100\n"
-            "steps."),
-        .pocket = POCKET_ITEMS,
+            "Repels Pokémon\n"
+            "found in the\n"
+            "wild."),
+        .pocket = POCKET_KEY_ITEMS,
         .sortType = ITEM_TYPE_FIELD_USE,
         .type = ITEM_USE_BAG_MENU,
-        .fieldUseFunc = ItemUseOutOfBattle_Repel,
-        .flingPower = 30,
+        .fieldUseFunc = ItemUseOutOfBattle_ToggleableRepel,
         .iconPic = gItemIcon_Repel,
         .iconPalette = gItemIconPalette_Repel,
     },

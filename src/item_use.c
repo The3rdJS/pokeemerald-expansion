@@ -1676,4 +1676,35 @@ void Task_OpenRegisteredHexOrb(u8 taskId)
     }
 }
 
+void ItemUseOutOfBattle_ToggleableRepel(u8 taskId)
+{
+    bool8 ToggleableRepelOn = FlagGet(WE_FLAG_NO_ENCOUNTER);
+    if (!ToggleableRepelOn)
+    {
+        FlagToggle(WE_FLAG_NO_ENCOUNTER);
+        PlaySE(SE_REPEL);
+        if(gTasks[taskId].tUsingRegisteredKeyItem)
+        {
+            DisplayItemMessageOnField(taskId, gText_ToggleableRepelOn, Task_CloseCantUseKeyItemMessage);
+        }
+        else
+        {
+            DisplayItemMessage(taskId, 1, gText_ToggleableRepelOn, CloseItemMessage);
+        }
+    }
+    else
+    {
+        FlagToggle(WE_FLAG_NO_ENCOUNTER);
+        PlaySE(SE_PC_OFF);
+        if (gTasks[taskId].tUsingRegisteredKeyItem)
+        {
+            DisplayItemMessageOnField(taskId, gText_ToggleableRepelOff, Task_CloseCantUseKeyItemMessage);
+        }
+        else
+        {
+            DisplayItemMessage(taskId, 1, gText_ToggleableRepelOn, CloseItemMessage);
+        }
+    }
+}
+
 #undef tUsingRegisteredKeyItem
